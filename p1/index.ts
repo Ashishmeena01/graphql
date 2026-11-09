@@ -20,6 +20,8 @@ const users = [
     { id: "5", name: "Hero", role: "ADMIN" }
 ];
 
+const userById = (id: string) => users.find(user => user.id === id) ?? null;
+
 const typeDefs = `#graphql
     type User {
         id: ID!
@@ -55,7 +57,7 @@ const typeDefs = `#graphql
 const resolvers = {
     Query: {
         users: () => users,
-        user: (_: any, { id }: any) => users.find(u => u.id === id),
+        user: (_: any, { id }: any) => userById(id),
         posts: () => posts,
         test: () => "hello"
     },
@@ -67,7 +69,7 @@ const resolvers = {
 
     Post: {
         author: (parent: any) =>
-            users.find(u => u.id === parent.authorId)
+            userById(parent.authorId)
     },
 
     Mutation: {
