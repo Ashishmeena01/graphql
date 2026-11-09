@@ -21,6 +21,7 @@ const users = [
 ];
 
 const userById = (id: string) => users.find(user => user.id === id) ?? null;
+const nextUserId = () => String(Math.max(0, ...users.map(user => Number(user.id))) + 1);
 
 const typeDefs = `#graphql
     type User {
@@ -75,7 +76,7 @@ const resolvers = {
     Mutation: {
         createUser: (_: any, { input }: any) => {
             const newUser = {
-                id: String(users.length + 1),
+                id: nextUserId(),
                 ...input
             };
 
