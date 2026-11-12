@@ -1,76 +1,65 @@
 
 import http from "node:http";
-import net from "node:net";
 import multer from "multer";
 import path from "node:path";
-
-
-
-
+import fs from "node:fs";
+import {json} from "express"
 
 const destination = path.join(import.meta.dirname, "dist");
 
+fs.mkdirSync(destination, { recursive: true });
+
 const storage = multer.diskStorage({
     destination,
-    filename: (req, file) => {
-        // console.log(req)
-        const fname = file + Date.now().toString() + ".zip";
-        console.log(`saving the file as ${fname}`);
-        return fname;
+    filename: (req, file, cb) => {
+        const fname = Date.now() + path.extname(file.originalname);
+        cb(null, fname);
     }
-})
-
-const mt = multer({
-    storage,
 });
 
+const mt = multer({ storage });
 
-// ---------------- HTTP SERVER ----------------
+const upload = mt.single("hero");
+
 
 const server = http.createServer((req, res) => {
-    
-    const r = mt.single("hero");
 
-    let c = (reqa,resa) => console.log("callback called");
+    upload(req, res, (err) => {
 
-    r(req,res,c);
-
-    let data = [];
-    req.on("data", (chunk) => {
-        data.push(chunk.toString());
-    });
-    
-    req.on("end", () => {
-
-        const rq = {...req};
-        rq.body = data;
-        
+        if (err) {
+            res.statusCode = 500;
+            return res.end("Upload failed");
+        }
 
         
 
-        // console.log("Method:", req.method);
-        // console.log("URL:", req.url);
-        // console.log("Headers:", req.headers);
-        // console.log("length",req.headers["content-length"]);
-        // console.log("Body:", body);
+        const middle = json();
 
-        const response = {
-            name: "ashish",
-            age: 21
-        };
+        middle(req,res,(err)=>{
+            if(err){
+                res.statusCode = 500;
+                return res.end("something went wrong");
+            }
 
-        res.statusCode = 201;
-        res.setHeader("server", "ashish personal");
-        res.setHeader("content-type", "application/json; charset=utf-8");
+            console.log("File:", req.file);
+            console.log("Body:", req.body);
 
-        res.end(JSON.stringify(response));
+            const response = {
+                name: "ashish",
+                age: 21,
+                uploaded: !!req.file
+            };
+
+            res.statusCode = 201;
+            res.setHeader("content-type", "application/json");
+
+            res.end(JSON.stringify(response));
+
+        })
     });
 
-    req.on("error", (err) => {
-        console.log("Request error:", err.message);
-    });
 });
 
 server.listen(3000, "localhost", () => {
-    console.log("[server2]: listening on port 3000");
+    console.log("Server listening on port 3000");
 });
