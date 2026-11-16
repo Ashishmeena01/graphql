@@ -14,7 +14,7 @@ const s = net.createServer((sock) => {
 
     sock.on("end", () => {
         console.log("Client ended its writable side");
-        console.log("Complete data:", Buffer.concat(data).toString());
+        // console.log("Complete data:", Buffer.concat(data).toString());
     });
 
     sock.on("close", () => {
