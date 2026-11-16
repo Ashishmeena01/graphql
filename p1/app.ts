@@ -10,7 +10,7 @@ const destination = path.join(import.meta.dirname, "dist");
 fs.mkdirSync(destination, { recursive: true });
 
 const storage = multer.diskStorage({
-    destination,
+    destination:'./dist',
     filename: (req, file, cb) => {
         const fname = Date.now() + path.extname(file.originalname);
         cb(null, fname);
@@ -23,10 +23,10 @@ const upload = mt.single("hero");
 
 
 const server = http.createServer((req, res) => {
-
+    
     upload(req, res, (err) => {
-
         if (err) {
+            console.log(err)
             res.statusCode = 500;
             return res.end("Upload failed");
         }
@@ -40,9 +40,6 @@ const server = http.createServer((req, res) => {
                 res.statusCode = 500;
                 return res.end("something went wrong");
             }
-
-            console.log("File:", req.file);
-            console.log("Body:", req.body);
 
             const response = {
                 name: "ashish",
